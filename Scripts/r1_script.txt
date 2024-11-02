@@ -1,0 +1,61 @@
+#Box sign function
+<Function AddBoxSign>
+	Set Name = %param1%
+	Set MainNegativeTex = %param2%
+	Set MainPositiveTex = %param3%
+	Set BoxTexture = %param4%
+	Set Thickness = %param5%
+	Set Direction = %param6% #True for front/back facing signs, False for left/right facing signs
+	Set DefWallOrient = %param7%
+	Set DefDrawWalls = %param8%
+	Set CenterX = %param9%
+	Set CenterZ = %param10%
+	Set SignWidth = %param11%
+	Set SignHeight = %param12%
+	Set Offset = %param13%
+	Set IsExternal = %param14%
+
+	Set Width = %SignWidth% / 2
+
+	if[%DefWallOrient% = true | %DefWallOrient% = True] WallOrientation = Center
+	if[(%DefDrawWalls% = true | %DefDrawWalls% = True) & %Thickness% ! 0] DrawWalls = true, true, true, true, true, true
+	if[(%DefDrawWalls% = true | %DefDrawWalls% = True) & %Thickness% = 0] DrawWalls = true, true, false, false, false, false
+
+	TextureOverride %MainNegativeTex%, %MainPositiveTex%, %BoxTexture%, %BoxTexture%, %BoxTexture%, %BoxTexture%
+	if[%Direction% = true | %Direction% = True] AddWall %Name%, %BoxTexture%, %Thickness%, %CenterX% - %Width%, %CenterZ%, %CenterX% + %Width%, %CenterZ%, %SignHeight%, %SignHeight%, %Offset%, %Offset%, 0, 0, %IsExternal%
+	TextureOverride %MainNegativeTex%, %MainPositiveTex%, %BoxTexture%, %BoxTexture%, %BoxTexture%, %BoxTexture%
+	if[%Direction% = false | %Direction% = False] AddWall %Name%, %BoxTexture%, %Thickness%, %CenterX%, %CenterZ% - %Width%, %CenterX%, %CenterZ% + %Width%, %SignHeight%, %SignHeight%, %Offset%, %Offset%, 0, 0, %IsExternal%
+<EndFunction>
+
+#Example syntax
+#AddBoxSign(Sign1, ExitSignRight, ExitSignLeft, StainlessSteel, 0.1, false, true, true, 22, 25, 1.8, 0.9, %height% - 0.9, false)
+
+#Wall function (with different textures on each part)
+<Function AddWall_CustomTex>
+	Set Name = %param1%
+	Set Parts = %param2% #This option can be set to either 2 or 3.
+	Set LTexture = %param3%
+	Set MTexture = %param4% #This is the upper wall's texture, if there are 2 parts of wall created.
+	Set UTexture = %param5% #If there are 2 parts of wall created, this parameter is ignored.
+	Set Thickness = %param6%
+	Set X1 = %param7%
+	Set Z1 = %param8%
+	Set X2 = %param9%
+	Set Z2 = %param10%
+	Set LHeight = %param11%
+	Set MHeight = %param12% #This is the upper wall's height, if there are 2 parts of wall created.
+	Set UHeight = %param13% #If there are 2 parts of wall created, this parameter is ignored.
+	Set Offset = %param14% #Offset of the wall's lowest part.
+	Set External = %param15%
+
+	if[%Parts% = 3] Set LHeight2 = %LHeight% + %MHeight%
+	if[%Parts% = 2] Set Name2 = %Name%_Upper
+	if[%Parts% = 3] Set Name2 = %Name%_Middle
+
+	AddWall %Name%_Lower, %LTexture%, %Thickness%, %X1%, %Z1%, %X2%, %Z2%, %LHeight%, %LHeight%, %Offset%, %Offset%, 0, 0, %External%
+	AddWall %Name2%, %MTexture%, %Thickness%, %X1%, %Z1%, %X2%, %Z2%, %MHeight%, %MHeight%, %LHeight% + %Offset%, %LHeight% + %Offset%, 0, 0, %External%
+	if[%Parts% = 3] AddWall %Name%_Upper, %UTexture%, %Thickness%, %X1%, %Z1%, %X2%, %Z2%, %UHeight%, %UHeight%, %LHeight2% + %Offset%, %LHeight2% + %Offset%, 0, 0, %External%
+<EndFunction>
+
+#Example syntax
+#AddWall_CustomTex(Left, 2, LobbyWallLower, LobbyWallUpper, Blank, 0.5, -120, -2, -120, 5, 4, %height% - 4, 0, 0, false)
